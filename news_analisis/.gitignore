@@ -1,0 +1,55 @@
+# .gitignore
+
+# ============= 민감한 정보 =============
+config.py
+
+# ============= Python =============
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ============= 가상 환경 =============
+venv/
+ENV/
+env/
+.venv
+
+# ============= IDE =============
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ============= 로그 파일 =============
+*.log
+*.txt
+
+# ============= OS =============
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============= 프로젝트 특정 파일 =============
+shipping_analysis.log

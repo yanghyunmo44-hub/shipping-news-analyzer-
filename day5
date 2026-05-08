@@ -1,0 +1,82 @@
+import requests
+import json
+from anthropic import Anthropic
+
+print("=== requests로 뉴스 가져오기 ===\n")
+
+# 1단계: NewsAPI 요청
+url = "https://newsapi.org/v2/everything"
+params = {
+    "q": "해운",
+    "language": "ko",
+    "sortBy": "publishedAt",
+    "apiKey": "f9b37627728245aaa23c54862c1eaeef"
+}
+
+news_response = requests.get(url, params=params)
+print(f"상태 코드: {news_response.status_code}\n")
+
+# 2단계: 성공한 경우만 진행
+if news_response.status_code == 200:
+    print("✅ 뉴스 API 성공!\n")
+    
+    news_data = news_response.json()
+    print(f"찾은 뉴스: {news_data['totalResults']}개")
+    print(f"가져온 뉴스: {len(news_data['articles'])}개\n")
+    
+    # 3단계: Claude 준비
+    print("=== Claude API로 뉴스 분석하기 ===\n")
+    client = Anthropic(api_key="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")
+    
+    all_analyses = []
+    
+    # 4단계: 뉴스 분석 (처음 3개)
+    for i, article in enumerate(news_data['articles'][:3]):
+        title = article['title']
+        source = article['source']['name']
+        
+        print(f"[{i+1}번 뉴스] {title}\n")
+        
+        # Claude 분석
+        claude_response = client.messages.create(
+            model="claude-haiku-4-5",
+            max_tokens=300,
+            messages=[{
+                "role": "user",
+                "content": f"""
+뉴스: {title}
+출처: {source}
+
+분석 (3~5줄):
+1. 긍정/부정?
+2. KOBC 신용리스크?
+3. 추천 조치?
+"""
+            }]
+        )
+        
+        analysis_text = claude_response.content[0].text
+        
+        # 결과 저장
+        result = {
+            "title": title,
+            "source": source,
+            "analysis": analysis_text
+        }
+        all_analyses.append(result)
+        
+        # 출력
+        print(analysis_text)
+        print(f"토큰: {claude_response.usage.input_tokens} + {claude_response.usage.output_tokens}\n")
+        print("-" * 50)
+    
+    # 5단계: 파일 저장
+    with open("monthly_analysis.json", "w", encoding="utf-8") as f:
+        json.dump(all_analyses, f, ensure_ascii=False, indent=2)
+    
+    print("✅ 분석 완료! monthly_analysis.json 저장됨")
+
+else:
+    print(f"❌ NewsAPI 실패!")
+    print(f"오류 코드: {news_response.status_code}")
+    print("API 키를 확인하세요")
